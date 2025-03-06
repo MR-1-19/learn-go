@@ -2,6 +2,10 @@ package main
 
 import "fmt"
 
+func Hello(name string) string {
+	return "Hello " + name
+}
+
 func main() {
-	fmt.Println("day 1")
+	fmt.Println(Hello("Chris"))
 }
