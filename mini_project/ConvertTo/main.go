@@ -1,36 +1,19 @@
 package main
 
 import (
-	"errors"
+	"ConvertTo/converter"
 	"fmt"
+	"log"
+	"os"
 )
 
-const minfar = -459.67
-const mincel = -273.15
-
-func ConvertTo(temp float64, scale string) (float64, error) {
-	switch scale {
-	case "цельсия":
-		return ConvertToCelsius(temp)
-	case "фаренгейты":
-		return ConvertToFahrenheit(temp)
-	default:
-		return 0, errors.New("Ошибка в шкале")
+func init() {
+	// Открываем файл логов
+	file, err := os.OpenFile("conversions.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal("Ошибка открытия файла логов:", err)
 	}
-}
-
-func ConvertToCelsius(fahrenheit float64) (float64, error) {
-	if fahrenheit < minfar {
-		return 0, errors.New("температура ниже абсолютного нуля")
-	}
-	return (fahrenheit - 32) * 5 / 9, nil
-}
-
-func ConvertToFahrenheit(celsius float64) (float64, error) {
-	if celsius < mincel {
-		return 0, errors.New("температура ниже абсолютного нуля")
-	}
-	return (celsius * 9 / 5) + 32, nil
+	log.SetOutput(file) // Записываем логи в файл
 }
 
 func main() {
@@ -39,19 +22,31 @@ func main() {
 
 	// Ввод температуры
 	fmt.Print("Введите температуру: ")
-	_, err := fmt.Scanf("%f", &temp)
+	_, err := fmt.Scanln(&temp)
 	if err != nil {
-		fmt.Println("Ошибка ввода температуры:", err)
+		log.Println("Ошибка ввода температуры:", err)
+		fmt.Println("Ошибка ввода температуры. Попробуйте снова.")
 		return
 	}
 
-	// Ввод шкалы
+	// Ввод шкалы (Цельсия или Фаренгейты)
 	fmt.Print("Введите шкалу (цельсия/фаренгейты): ")
-	_, err = fmt.Scanf("%s", &scale)
+	_, err = fmt.Scanln(&scale)
 	if err != nil {
-		fmt.Println("Ошибка ввода шкалы:", err)
+		log.Println("Ошибка ввода шкалы:", err)
+		fmt.Println("Ошибка ввода шкалы. Попробуйте снова.")
 		return
 	}
 
-	ConvertTo(142, fmt.Scanf(""))
+	// Конвертация температуры
+	result, err := converter.ConvertTo(temp, scale)
+	if err != nil {
+		log.Println("Ошибка преобразования:", err)
+		fmt.Println("Ошибка:", err)
+		return
+	}
+
+	// Вывод результата
+	log.Printf("Конвертация: %.2f %s -> %.2f\n", temp, scale, result)
+	fmt.Printf("Результат: %.2f\n", result)
 }
